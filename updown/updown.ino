@@ -46,30 +46,35 @@ void loop()
 {
   delay(1500);  // DHT11 library recommends not taking the first reading for at least 1 second.
   String status = dht11int->status();
-  Serial.println(status);
+  Serial.print(status);
+  Serial.print(" ");
   
   if (status == "AOK") {
     float reading = dht11int->celsius();
-    Serial.println(reading, 10);
+    Serial.print(reading, 3);
+    Serial.print(" ");
     readings[readingIndex] = reading;
     readingIndex = (readingIndex + 1) % HISTORY_SIZE;
     
+    Serial.print("[");
     for (int i = 0 ; i < HISTORY_SIZE ; ++i) {
-      Serial.print(i);
-      Serial.print(" = ");
-      Serial.println(readings[i]);
+      Serial.print(readings[i], 3);
+      Serial.print(",");
     }
+    Serial.print("]");
     
     float avg = average(readings);
-    Serial.print("Average = ");
-    Serial.println(avg, 10);
+    Serial.print("=");
+    Serial.print(avg, 3);
     
     if (reading > avg) {
-      Serial.println("Increasing");
+      Serial.print(" Incr");
     } else if (reading == avg) {
-      Serial.println("Holding");
+      Serial.print(" Hold");
     } else {
-      Serial.println("Decreasing");
+      Serial.print(" Decr");
     }
   }
+  
+  Serial.println();
 }
