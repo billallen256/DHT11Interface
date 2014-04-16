@@ -73,26 +73,28 @@ void loop()
   if (readingIndex == INTERVAL) {
     Serial.println(readingIndex);
     String status = dht11int->status();
-    char tempChars[10];
-    char humidityChars[10];
-    char dewChars[10];
-    String temp = dtostrf((double)average(tempReadings, INTERVAL), 7, 2, tempChars);
+    float temp = average(tempReadings, INTERVAL);
     Serial.println(temp);
-    String humidity = dtostrf((double)average(humidityReadings, INTERVAL), 7, 2, humidityChars);
+    float humidity = average(humidityReadings, INTERVAL);
     Serial.println(humidity);
-    String dew = dtostrf((double)average(dewReadings, INTERVAL), 7, 2, dewChars);
+    float dew = average(dewReadings, INTERVAL);
     Serial.println(dew);
-    String dataString = status + "," + temp + "," + humidity + "," + dew;
-    Serial.print(dataString);
+
     File dataFile = SD.open("log.csv", FILE_WRITE);
     
     if (dataFile) {
-      dataFile.println(dataString);
-      dataFile.close();
+      dataFile.print(temp, 3);
+      dataFile.print(",");
+      dataFile.print(humidity, 3);
+      dataFile.print(",");
+      dataFile.print(dew);
+      dataFile.println();
       Serial.println(" ...WRITTEN");
     } else {
       Serial.println(" ...FAILED");
     }
+    
+    dataFile.close();
     
     readingIndex = 0;
   } else {
@@ -107,3 +109,4 @@ void loop()
     ++readingIndex;
   }
 }
+
