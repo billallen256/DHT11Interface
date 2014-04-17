@@ -14,18 +14,20 @@
 
 const int DHTPIN = 2;
 const int CHIP_SELECT = 4;
-const int INTERVAL = 60; // seconds
+const int INTERVAL = 10; // seconds
 
 DHT11Interface *dht11int;
 float tempReadings[INTERVAL];
 float humidityReadings[INTERVAL];
 float dewReadings[INTERVAL];
 int readingIndex;
+bool firstIter;
 
 void setup()
 {
   dht11int = new DHT11Interface(DHTPIN);
   readingIndex = 0;
+  firstIter = false;
   
   for (int i = 0 ; i < INTERVAL ; ++i) {
     tempReadings[i] = 0.0;
@@ -33,7 +35,7 @@ void setup()
     dewReadings[i] = 0.0;
   }
   
-  Serial.begin(115200);
+  Serial.begin(9600);
   Serial.println("DHT11 Logger");
   Serial.print("Initializing SD card...");
   
@@ -69,16 +71,29 @@ float average(float readings[], int length) {
 void loop()
 {
   delay(1000);  // DHT11 library recommends not taking the first reading for at least 1 second.
+  Serial.println(readingIndex);
+
+  for (int i = 0 ; i < INTERVAL ; ++i) {
+    Serial.print("[");
+    Serial.print(tempReadings[i]);
+    Serial.print(",");
+    Serial.print(humidityReadings[i]);
+    Serial.print(","); 
+    Serial.print(dewReadings[i]);
+    Serial.print("]");
+  }
   
-  if (readingIndex == INTERVAL) {
-    Serial.println(readingIndex);
+  Serial.println();
+  
+  if (readingIndex == 0 && firstIter == true) {
+    Serial.println(readingIndex, 3);
     String status = dht11int->status();
     float temp = average(tempReadings, INTERVAL);
-    Serial.println(temp);
+    Serial.println(temp, 3);
     float humidity = average(humidityReadings, INTERVAL);
-    Serial.println(humidity);
+    Serial.println(humidity, 3);
     float dew = average(dewReadings, INTERVAL);
-    Serial.println(dew);
+    Serial.println(dew, 3);
 
     File dataFile = SD.open("log.csv", FILE_WRITE);
     
@@ -87,26 +102,25 @@ void loop()
       dataFile.print(",");
       dataFile.print(humidity, 3);
       dataFile.print(",");
-      dataFile.print(dew);
+      dataFile.print(dew, 3);
       dataFile.println();
       Serial.println(" ...WRITTEN");
+      dataFile.close();
     } else {
       Serial.println(" ...FAILED");
     }
-    
-    dataFile.close();
-    
-    readingIndex = 0;
   } else {
-    Serial.println(readingIndex);
-    
     if (dht11int->status() == "AOK") {
       tempReadings[readingIndex] = dht11int->celsius();
       humidityReadings[readingIndex] = dht11int->humidity();
       dewReadings[readingIndex] = dht11int->dewPoint();
     }
-    
-    ++readingIndex;
   }
+
+  if (readingIndex + 1 == INTERVAL) {
+    firstIter = true;
+  }
+
+  readingIndex = (readingIndex + 1) % INTERVAL;
 }
 
