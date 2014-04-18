@@ -14,7 +14,7 @@
 
 const int DHTPIN = 2;
 const int CHIP_SELECT = 4;
-const int INTERVAL = 10; // seconds
+const int INTERVAL = 15; // seconds
 
 DHT11Interface *dht11int;
 float tempReadings[INTERVAL];
@@ -73,17 +73,17 @@ void loop()
   delay(1000);  // DHT11 library recommends not taking the first reading for at least 1 second.
   Serial.println(readingIndex);
 
-  for (int i = 0 ; i < INTERVAL ; ++i) {
-    Serial.print("[");
-    Serial.print(tempReadings[i]);
-    Serial.print(",");
-    Serial.print(humidityReadings[i]);
-    Serial.print(","); 
-    Serial.print(dewReadings[i]);
-    Serial.print("]");
-  }
-  
-  Serial.println();
+//  for (int i = 0 ; i < INTERVAL ; ++i) {
+//    Serial.print("[");
+//    Serial.print(tempReadings[i]);
+//    Serial.print(",");
+//    Serial.print(humidityReadings[i]);
+//    Serial.print(","); 
+//    Serial.print(dewReadings[i]);
+//    Serial.print("]");
+//  }
+//  
+//  Serial.println();
   
   if (readingIndex == 0 && firstIter == true) {
     Serial.println(readingIndex, 3);
